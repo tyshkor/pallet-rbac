@@ -47,4 +47,4 @@ jobs:
           cargo fmt --check
 
       - name: TOML format check
-          run: cargo install taplo-cli --locked && taplo fmt --check
+        run: cargo install taplo-cli --locked && taplo fmt --check
