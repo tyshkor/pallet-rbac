@@ -101,3 +101,16 @@ fn add_global_admin() {
 		System::assert_last_event(Event::GlobalAdminAdded { account_id }.into());
 	});
 }
+
+#[test]
+fn add_general_admin_by_nonroot_should_fail() {
+	new_test_ext().execute_with(|| {
+		// Assert adding a new Global Admin by root account succeeds
+		assert_ok!(TemplateModule::add_global_admin(RuntimeOrigin::root(), 2));
+		// Assert adding a new Global Admin by non-root account fails
+		assert_noop!(
+			TemplateModule::add_global_admin(RuntimeOrigin::signed(2), 3),
+			sp_runtime::DispatchError::BadOrigin
+		);
+	});
+}
