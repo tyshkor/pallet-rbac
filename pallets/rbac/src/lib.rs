@@ -117,6 +117,32 @@ pub mod pallet {
 
 	#[pallet::hooks]
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
+
+	#[pallet::call]
+	impl<T: Config> Pallet<T> {
+		/// Creates a `Role`.
+		/// 
+		/// Returns `RoleAlreadyExists` error in case `Role` that one is trying to create already exists.
+		#[pallet::call_index(0)]
+		#[pallet::weight(T::WeightInfo::create_role())]
+		pub fn create_role(
+			origin: OriginFor<T>,
+			pallet_name: PalletName,
+			permission: Permission,
+		) -> DispatchResult {
+			ensure_signed(origin)?;
+
+			let role = Role { pallet: pallet_name, permission };
+
+			if <RoleSet<T>>::contains_key(&role)  {
+				return Err(Error::<T>::RoleAlreadyExists.into())
+			}
+			
+			RoleSet::<T>::insert(role.clone(), ());
+			Self::deposit_event(Event::RoleCreated { role });
+
+			Ok(())
+		}
 	}
 }
 
