@@ -69,6 +69,26 @@ pub mod pallet {
 	#[pallet::storage]
 	#[pallet::getter(fn roles)]
 	pub type RoleSet<T: Config> = StorageMap<_, Blake2_128Concat, Role, ()>;
+
+	#[pallet::genesis_config]
+	pub struct GenesisConfig<T: Config> {
+		pub general_admins: Vec<T::AccountId>,
+	}
+
+	impl<T: Config> Default for GenesisConfig<T> {
+		fn default() -> Self {
+			Self { general_admins: Vec::new() }
+		}
+	}
+
+	#[pallet::genesis_build]
+	impl<T: Config> BuildGenesisConfig for GenesisConfig<T> {
+		fn build(&self) {
+			for admin in &self.general_admins {
+				<GlobalAdminSet<T>>::insert(admin, ());
+			}
+		}
+	}
 }
 
 #[derive(PartialEq, Eq, Clone, RuntimeDebug, Encode, Decode, TypeInfo, MaxEncodedLen)]
