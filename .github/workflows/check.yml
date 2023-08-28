@@ -41,3 +41,11 @@ jobs:
         run: >
           pushd node &&
           cargo check --features=runtime-benchmarks --release
+
+      - name: Code format check
+        run: |
+          cargo fmt --check
+
+      - name: TOML format check
+          run: |
+            cargo install taplo-cli --locked && taplo fmt --check
