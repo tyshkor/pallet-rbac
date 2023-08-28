@@ -69,5 +69,13 @@ mod benchmarks {
 
 	}
 
+	#[benchmark]
+	fn add_global_admin() {
+		let global_admin_candidate: T::AccountId = account("Bob", 3, 3);
+
+		#[extrinsic_call]
+		add_global_admin(RawOrigin::Root, global_admin_candidate);
+	}
+
 	impl_benchmark_test_suite!(Template, crate::mock::new_test_ext(), crate::mock::Test);
 }
