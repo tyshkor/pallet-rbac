@@ -33,6 +33,13 @@ jobs:
       # Rust cache
       - uses: Swatinem/rust-cache@v2
 
+      - name: Code format check
+        run: |
+          cargo fmt --check
+
+      - name: TOML format check
+        run: cargo install taplo-cli && taplo fmt --check
+
       - name: Check Build
         run: |
           SKIP_WASM_BUILD=1 cargo check --release
@@ -41,10 +48,3 @@ jobs:
         run: >
           pushd node &&
           cargo check --features=runtime-benchmarks --release
-
-      - name: Code format check
-        run: |
-          cargo fmt --check
-
-      - name: TOML format check
-        run: cargo install taplo-cli && taplo fmt --check
