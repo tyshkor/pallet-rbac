@@ -143,6 +143,33 @@ pub mod pallet {
 
 			Ok(())
 		}
+
+		/// Assignes a `Role` to an account.
+		/// 
+		/// Returns `RoleDoesNotExist` error in case `Role` did not exist in the first place.
+		/// Returns `AccessDenied` error in case the account trying to assign isn't an Admin or Global Admin.
+		#[pallet::call_index(1)]
+		#[pallet::weight(T::WeightInfo::assign_role())]
+		pub fn assign_role(
+			origin: OriginFor<T>,
+			account_id: T::AccountId,
+			role: Role,
+		) -> DispatchResult {
+			let who = ensure_signed(origin)?;
+
+			if !<RoleSet<T>>::contains_key(&role) {
+				return Err(Error::<T>::RoleDoesNotExist.into())
+			}
+
+			if Self::verify_manage_access(who.clone(), role.pallet.clone()) || <GlobalAdminSet<T>>::contains_key(&who) {
+				<PermissionSet<T>>::insert((account_id.clone(), role.clone()), ());
+
+				Self::deposit_event(Event::RoleAssigned { pallet_name: role.pallet, account_id });
+			} else {
+				return Err(Error::<T>::AccessDenied.into())
+			}
+			Ok(())
+		}
 	}
 }
 
