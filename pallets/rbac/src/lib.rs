@@ -232,3 +232,38 @@ pub struct Role {
 	pallet: [u8; 36],
 	permission: Permission,
 }
+
+impl<T: Config> Pallet<T> {
+	pub fn verify_execute_access(account_id: T::AccountId, pallet: PalletName) -> bool {
+		let role = Role { pallet, permission: Permission::Execute };
+		<RoleSet<T>>::contains_key(&role) && <PermissionSet<T>>::contains_key((account_id, role))
+	}
+
+	fn verify_manage_access(account_id: T::AccountId, pallet: PalletName) -> bool {
+		let role = Role { pallet, permission: Permission::Manage };
+		<RoleSet<T>>::contains_key(&role) && <PermissionSet<T>>::contains_key((account_id, role))
+	}
+}
+
+/// The `Authorization` struct.
+#[derive(Encode, Decode, Clone, Eq, PartialEq, TypeInfo)]
+#[scale_info(skip_type_params(T))]
+pub struct Authorization<T: Config + Send + Sync>(sp_std::marker::PhantomData<T>);
+
+impl<T: Config + Send + Sync> sp_std::fmt::Debug for Authorization<T> {
+	#[cfg(feature = "std")]
+	fn fmt(&self, f: &mut sp_std::fmt::Formatter) -> sp_std::fmt::Result {
+		write!(f, "Authorization")
+	}
+
+	#[cfg(not(feature = "std"))]
+	fn fmt(&self, _: &mut sp_std::fmt::Formatter) -> sp_std::fmt::Result {
+		Ok(())
+	}
+}
+
+impl<T: Config + Send + Sync> Authorization<T> {
+	pub fn new() -> Self {
+		Self(sp_std::marker::PhantomData)
+	}
+}
