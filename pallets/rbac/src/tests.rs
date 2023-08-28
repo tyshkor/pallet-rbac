@@ -56,3 +56,20 @@ fn assign_non_existent_role_should_fail() {
 		);
 	});
 }
+
+#[test]
+fn unassign_role() {
+	new_test_ext_with_general_admin().execute_with(|| {
+		System::set_block_number(1);
+		let pallet_name = [0; 36];
+		let account_id = 42;
+		// Assert creating the role succeeds
+		assert_ok!(TemplateModule::create_role(RuntimeOrigin::signed(1), pallet_name.clone(), crate::Permission::Manage));
+		// Assert assigning the role succeeds
+		assert_ok!(TemplateModule::assign_role(RuntimeOrigin::signed(1), account_id, crate::Role { pallet: pallet_name, permission: crate::Permission::Manage }));
+		// Assert unassigning the role succeeds
+		assert_ok!(TemplateModule::unassign_role(RuntimeOrigin::signed(1), account_id, crate::Role { pallet: pallet_name, permission: crate::Permission::Manage }));
+		// Assert that the correct event was deposited
+		System::assert_last_event(Event::RoleUnassigned { pallet_name, account_id }.into());
+	});
+}
