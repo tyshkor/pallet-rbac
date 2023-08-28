@@ -198,6 +198,21 @@ pub mod pallet {
 			}
 			Ok(())
 		}
+
+		/// Add a new Global Admin.
+		/// Global Admin has access to execute and manage all pallets.
+		///
+		/// Only _root_ can add a Global Admin.
+		#[pallet::call_index(3)]
+		#[pallet::weight(T::WeightInfo::add_global_admin())]
+		pub fn add_global_admin(origin: OriginFor<T>, account_id: T::AccountId) -> DispatchResult {
+			// Ensures that only root can call this ectrinsic
+			T::RbacAdminOrigin::ensure_origin(origin)?;
+			<GlobalAdminSet<T>>::insert(&account_id, ());
+			Self::deposit_event(Event::GlobalAdminAdded { account_id });
+			Ok(())
+		}
+	}
 }
 
 #[derive(PartialEq, Eq, Clone, RuntimeDebug, Encode, Decode, TypeInfo, MaxEncodedLen)]
