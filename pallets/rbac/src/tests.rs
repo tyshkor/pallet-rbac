@@ -43,3 +43,16 @@ fn assign_role() {
 
 	});
 }
+
+#[test]
+fn assign_non_existent_role_should_fail() {
+	new_test_ext_with_general_admin().execute_with(|| {
+		System::set_block_number(1);
+		let pallet_name = [0; 36];
+		// Assert assigning the non-existent role fails
+		assert_noop!(
+			TemplateModule::assign_role(RuntimeOrigin::signed(1), 42, crate::Role { pallet: pallet_name, permission: crate::Permission::Execute }),
+			crate::pallet::Error::RoleDoesNotExist::<Test>,
+		);
+	});
+}
