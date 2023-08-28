@@ -267,3 +267,64 @@ impl<T: Config + Send + Sync> Authorization<T> {
 		Self(sp_std::marker::PhantomData)
 	}
 }
+
+/// `SignedExtension` has to be implemented for `Authorization` to be able to 
+/// filter out extrinsics sent by the not authorized accounts
+///  Validation is happenning at transaction queue level,
+///  and the extrinsics are filtered out before they hit the pallet logic.
+impl<T: Config + Send + Sync> SignedExtension for Authorization<T>
+where
+	T::RuntimeCall: Dispatchable<Info = DispatchInfo> + GetCallMetadata,
+{
+	type AccountId = T::AccountId;
+	type Call = T::RuntimeCall;
+	type AdditionalSigned = ();
+	type Pre = ();
+	const IDENTIFIER: &'static str = "Authorization";
+
+	fn pre_dispatch(
+		self,
+		_who: &Self::AccountId,
+		_call: &Self::Call,
+		_info: &<Self::Call as Dispatchable>::Info,
+		_len: usize,
+	) -> Result<Self::Pre, TransactionValidityError> {
+		Ok(())
+	}
+
+	fn additional_signed(&self) -> sp_std::result::Result<(), TransactionValidityError> {
+		Ok(())
+	}
+
+	fn validate(
+		&self,
+		who: &Self::AccountId,
+		call: &Self::Call,
+		_info: &DispatchInfoOf<Self::Call>,
+		_len: usize,
+	) -> TransactionValidity {
+		if <GlobalAdminSet<T>>::contains_key(who.clone()) {
+			return Ok(Default::default())
+		}
+
+		let md = call.get_call_metadata();
+
+		let pallet_name_bytes = md.pallet_name.as_bytes();
+
+		if pallet_name_bytes.len() > 36 {
+			return Err(InvalidTransaction::Call.into())
+		}
+
+		let mut pallet_name: PalletName = [0; PALLET_NAME_LENGTH];
+
+        for (i, &byte) in pallet_name_bytes.iter().enumerate() {
+            pallet_name[i] = byte;
+        }
+
+		if <Pallet<T>>::verify_execute_access(who.clone(), pallet_name) {
+			Ok(Default::default())
+		} else {
+			Err(InvalidTransaction::Call.into())
+		}
+	}
+}
