@@ -106,6 +106,18 @@ pub mod pallet {
 		RoleAssigned { pallet_name: PalletName, account_id: T::AccountId },
 		GlobalAdminAdded { account_id: T::AccountId },
 	}
+
+	#[pallet::error]
+	pub enum Error<T> {
+		AccessDenied,
+		RoleAlreadyExists,
+		RoleDoesNotExist,
+		RoleWasNotAssigned,
+	}
+
+	#[pallet::hooks]
+	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
+	}
 }
 
 #[derive(PartialEq, Eq, Clone, RuntimeDebug, Encode, Decode, TypeInfo, MaxEncodedLen)]
