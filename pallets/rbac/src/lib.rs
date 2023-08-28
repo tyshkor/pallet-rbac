@@ -1,10 +1,10 @@
 //! # Role-based Access Control (RBAC) Pallet
 //!
 //! The RBAC FRAME Pallet can be used with other pallets:
-//! 1. to define roles, 
-//! 2. assign roles required for extrinsic calls, 
-//! 3. assign accounts to roles, 
-//! 4. restrict extrinsic calls to assigned accounts 
+//! 1. to define roles,
+//! 2. assign roles required for extrinsic calls,
+//! 3. assign accounts to roles,
+//! 4. restrict extrinsic calls to assigned accounts
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use codec::{Decode, Encode};
@@ -61,19 +61,19 @@ pub mod pallet {
 	}
 
 	// Set for storing all Global Admins i.e. accounts that have access to all pallets' roles
-	// `StorageMap` is used as there are no native Set type 
+	// `StorageMap` is used as there are no native Set type
 	#[pallet::storage]
 	#[pallet::getter(fn general_admins)]
 	pub type GlobalAdminSet<T: Config> = StorageMap<_, Blake2_128Concat, T::AccountId, ()>;
 
 	// Set for storing all `Permission`s
-	// `StorageMap` is used as there are no native Set type 
+	// `StorageMap` is used as there are no native Set type
 	#[pallet::storage]
 	#[pallet::getter(fn permissions)]
 	pub type PermissionSet<T: Config> = StorageMap<_, Blake2_128Concat, (T::AccountId, Role), ()>;
 
 	// Set for storing all `Role`s
-	// `StorageMap` is used as there are no native Set type 
+	// `StorageMap` is used as there are no native Set type
 	#[pallet::storage]
 	#[pallet::getter(fn roles)]
 	pub type RoleSet<T: Config> = StorageMap<_, Blake2_128Concat, Role, ()>;
@@ -121,8 +121,9 @@ pub mod pallet {
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
 		/// Creates a `Role`.
-		/// 
-		/// Returns `RoleAlreadyExists` error in case `Role` that one is trying to create already exists.
+		///
+		/// Returns `RoleAlreadyExists` error in case `Role` that one is trying to create already
+		/// exists.
 		#[pallet::call_index(0)]
 		#[pallet::weight(T::WeightInfo::create_role())]
 		pub fn create_role(
@@ -134,10 +135,10 @@ pub mod pallet {
 
 			let role = Role { pallet: pallet_name, permission };
 
-			if <RoleSet<T>>::contains_key(&role)  {
+			if <RoleSet<T>>::contains_key(&role) {
 				return Err(Error::<T>::RoleAlreadyExists.into())
 			}
-			
+
 			RoleSet::<T>::insert(role.clone(), ());
 			Self::deposit_event(Event::RoleCreated { role });
 
@@ -145,9 +146,10 @@ pub mod pallet {
 		}
 
 		/// Assignes a `Role` to an account.
-		/// 
+		///
 		/// Returns `RoleDoesNotExist` error in case `Role` did not exist in the first place.
-		/// Returns `AccessDenied` error in case the account trying to assign isn't an Admin or Global Admin.
+		/// Returns `AccessDenied` error in case the account trying to assign isn't an Admin or
+		/// Global Admin.
 		#[pallet::call_index(1)]
 		#[pallet::weight(T::WeightInfo::assign_role())]
 		pub fn assign_role(
@@ -161,7 +163,9 @@ pub mod pallet {
 				return Err(Error::<T>::RoleDoesNotExist.into())
 			}
 
-			if Self::verify_manage_access(who.clone(), role.pallet.clone()) || <GlobalAdminSet<T>>::contains_key(&who) {
+			if Self::verify_manage_access(who.clone(), role.pallet.clone()) ||
+				<GlobalAdminSet<T>>::contains_key(&who)
+			{
 				<PermissionSet<T>>::insert((account_id.clone(), role.clone()), ());
 
 				Self::deposit_event(Event::RoleAssigned { pallet_name: role.pallet, account_id });
@@ -172,9 +176,10 @@ pub mod pallet {
 		}
 
 		/// Unassignes a `Role` from an account.
-		/// 
+		///
 		/// Returns `RoleWasNotAssigned` error in case `Role` was not assigned in the first place.
-		/// Returns `AccessDenied` error in case the account trying to unassign isn't an Admin or Global Admin.
+		/// Returns `AccessDenied` error in case the account trying to unassign isn't an Admin or
+		/// Global Admin.
 		#[pallet::call_index(2)]
 		#[pallet::weight(T::WeightInfo::unassign_role())]
 		pub fn unassign_role(
@@ -184,13 +189,14 @@ pub mod pallet {
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 
-			if Self::verify_manage_access(who.clone(), role.pallet.clone()) || <GlobalAdminSet<T>>::contains_key(&who) {
+			if Self::verify_manage_access(who.clone(), role.pallet.clone()) ||
+				<GlobalAdminSet<T>>::contains_key(&who)
+			{
 				if !<PermissionSet<T>>::contains_key(&(account_id.clone(), role.clone())) {
 					return Err(Error::<T>::RoleWasNotAssigned.into())
 				}
-				
-				<PermissionSet<T>>::remove((account_id.clone(), role.clone()));
 
+				<PermissionSet<T>>::remove((account_id.clone(), role.clone()));
 
 				Self::deposit_event(Event::RoleUnassigned { pallet_name: role.pallet, account_id });
 			} else {
@@ -268,7 +274,7 @@ impl<T: Config + Send + Sync> Authorization<T> {
 	}
 }
 
-/// `SignedExtension` has to be implemented for `Authorization` to be able to 
+/// `SignedExtension` has to be implemented for `Authorization` to be able to
 /// filter out extrinsics sent by the not authorized accounts
 ///  Validation is happenning at transaction queue level,
 ///  and the extrinsics are filtered out before they hit the pallet logic.
@@ -317,9 +323,9 @@ where
 
 		let mut pallet_name: PalletName = [0; PALLET_NAME_LENGTH];
 
-        for (i, &byte) in pallet_name_bytes.iter().enumerate() {
-            pallet_name[i] = byte;
-        }
+		for (i, &byte) in pallet_name_bytes.iter().enumerate() {
+			pallet_name[i] = byte;
+		}
 
 		if <Pallet<T>>::verify_execute_access(who.clone(), pallet_name) {
 			Ok(Default::default())
