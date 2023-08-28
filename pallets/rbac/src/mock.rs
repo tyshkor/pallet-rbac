@@ -1,5 +1,6 @@
 use crate as pallet_rbac;
-use frame_support::traits::{ConstU16, ConstU64};
+use frame_support::{traits::{ConstU16, ConstU64, EnsureOrigin}, weights::Weight};
+use frame_system::EnsureRoot;
 use sp_core::H256;
 use sp_runtime::{
 	traits::{BlakeTwo256, IdentityLookup},
@@ -7,6 +8,25 @@ use sp_runtime::{
 };
 
 type Block = frame_system::mocking::MockBlock<Test>;
+type TestWeightInfo = ();
+
+impl crate::pallet::WeightInfo for TestWeightInfo {
+    fn create_role() -> Weight {
+        todo!()
+    }
+
+    fn assign_role() -> Weight {
+        todo!()
+    }
+
+    fn unassign_role() -> Weight {
+        todo!()
+    }
+
+    fn add_global_admin() -> Weight {
+        todo!()
+    }
+}
 
 // Configure a mock runtime to test the pallet.
 frame_support::construct_runtime!(
@@ -46,6 +66,7 @@ impl frame_system::Config for Test {
 impl pallet_rbac::Config for Test {
 	type RuntimeEvent = RuntimeEvent;
 	type WeightInfo = ();
+	type RbacAdminOrigin = EnsureRoot<Self::AccountId>;
 }
 
 // Build genesis storage according to the mock runtime.
