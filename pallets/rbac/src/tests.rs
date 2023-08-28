@@ -29,3 +29,17 @@ fn create_the_same_role_twice_should_fail() {
 		);
 	});
 }
+
+#[test]
+fn assign_role() {
+	new_test_ext_with_general_admin().execute_with(|| {
+		System::set_block_number(1);
+		// Assert creating the role succeeds
+		assert_ok!(TemplateModule::create_role(RuntimeOrigin::signed(1), [0; 36], crate::Permission::Execute));
+		let pallet_name = [0; 36];
+		// Assert assigning the role succeeds
+		assert_ok!(TemplateModule::assign_role(RuntimeOrigin::signed(1), 42, crate::Role { pallet: pallet_name, permission: crate::Permission::Execute }));
+		System::assert_last_event(Event::RoleAssigned { pallet_name, account_id: 42 }.into());
+
+	});
+}
