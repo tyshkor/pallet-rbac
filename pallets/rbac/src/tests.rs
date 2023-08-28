@@ -73,3 +73,18 @@ fn unassign_role() {
 		System::assert_last_event(Event::RoleUnassigned { pallet_name, account_id }.into());
 	});
 }
+
+#[test]
+fn unassign_role_that_was_not_assigned_should_fail() {
+	new_test_ext_with_general_admin().execute_with(|| {
+		System::set_block_number(1);
+		let pallet_name = [0; 36];
+		// Assert creating the role succeeds
+		assert_ok!(TemplateModule::create_role(RuntimeOrigin::signed(1), pallet_name, crate::Permission::Manage));
+		// Assert unassigning the non-assigned role fails
+		assert_noop!(
+			TemplateModule::unassign_role(RuntimeOrigin::signed(1), 42, crate::Role { pallet: pallet_name, permission: crate::Permission::Manage }),
+			crate::pallet::Error::RoleWasNotAssigned::<Test>,
+		);
+	});
+}
