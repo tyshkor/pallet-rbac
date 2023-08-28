@@ -41,5 +41,33 @@ mod benchmarks {
 		assign_role(RawOrigin::Signed(caller), account_id, role);
 	}
 
+	#[benchmark]
+	fn unassign_role() {
+		let caller: T::AccountId = whitelisted_caller();
+
+		let role = Role { pallet: [0; 36], permission: crate::Permission::Manage };
+
+		RoleSet::<T>::insert(
+			role.clone(),
+			()
+		);
+
+		PermissionSet::<T>::insert(
+			(caller.clone(), role.clone()),
+			()
+		);
+
+		let account_id: T::AccountId = account("Bob", 3, 3);
+
+		PermissionSet::<T>::insert(
+			(account_id.clone(), role.clone()),
+			()
+		);
+
+		#[extrinsic_call]
+		unassign_role(RawOrigin::Signed(caller), account_id, role);
+
+	}
+
 	impl_benchmark_test_suite!(Template, crate::mock::new_test_ext(), crate::mock::Test);
 }
