@@ -170,7 +170,34 @@ pub mod pallet {
 			}
 			Ok(())
 		}
-	}
+
+		/// Unassignes a `Role` from an account.
+		/// 
+		/// Returns `RoleWasNotAssigned` error in case `Role` was not assigned in the first place.
+		/// Returns `AccessDenied` error in case the account trying to unassign isn't an Admin or Global Admin.
+		#[pallet::call_index(2)]
+		#[pallet::weight(T::WeightInfo::unassign_role())]
+		pub fn unassign_role(
+			origin: OriginFor<T>,
+			account_id: T::AccountId,
+			role: Role,
+		) -> DispatchResult {
+			let who = ensure_signed(origin)?;
+
+			if Self::verify_manage_access(who.clone(), role.pallet.clone()) || <GlobalAdminSet<T>>::contains_key(&who) {
+				if !<PermissionSet<T>>::contains_key(&(account_id.clone(), role.clone())) {
+					return Err(Error::<T>::RoleWasNotAssigned.into())
+				}
+				
+				<PermissionSet<T>>::remove((account_id.clone(), role.clone()));
+
+
+				Self::deposit_event(Event::RoleUnassigned { pallet_name: role.pallet, account_id });
+			} else {
+				return Err(Error::<T>::AccessDenied.into())
+			}
+			Ok(())
+		}
 }
 
 #[derive(PartialEq, Eq, Clone, RuntimeDebug, Encode, Decode, TypeInfo, MaxEncodedLen)]
