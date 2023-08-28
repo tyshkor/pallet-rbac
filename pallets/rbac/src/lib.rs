@@ -52,6 +52,14 @@ pub mod pallet {
 		type RbacAdminOrigin: EnsureOrigin<Self::RuntimeOrigin>;
 	}
 
+	/// Weight functions needed for pallet_rbac.
+	pub trait WeightInfo {
+		fn create_role() -> Weight;
+		fn assign_role() -> Weight;
+		fn unassign_role() -> Weight;
+		fn add_global_admin() -> Weight;
+	}
+
 	// Set for storing all Global Admins i.e. accounts that have access to all pallets' roles
 	// `StorageMap` is used as there are no native Set type 
 	#[pallet::storage]
@@ -88,6 +96,15 @@ pub mod pallet {
 				<GlobalAdminSet<T>>::insert(admin, ());
 			}
 		}
+	}
+
+	#[pallet::event]
+	#[pallet::generate_deposit(pub(super) fn deposit_event)]
+	pub enum Event<T: Config> {
+		RoleCreated { role: Role },
+		RoleUnassigned { pallet_name: PalletName, account_id: T::AccountId },
+		RoleAssigned { pallet_name: PalletName, account_id: T::AccountId },
+		GlobalAdminAdded { account_id: T::AccountId },
 	}
 }
 
