@@ -10,6 +10,7 @@ The Role-based Access Control (RBAC) pallet is designed to provide a role-based 
   - [Unassigning Roles from Accounts](#unassigning-roles-from-accounts)
   - [Adding a  Global Admin](#adding-a-global-admin)
 - [Installation and configuration](#installation-and-configuration)
+- [Demo create and assign a role for exrinsic](#demo-create-and-assign-a-role-for-exrinsic)
 - [License](#license)
 
 ## Features
@@ -96,6 +97,42 @@ rbac: Some(RBACConfig {
 ```
 
 * `cargo build --release` and then `cargo run --release -- --dev`
+
+## Demo create and assign a role for exrinsic
+
+1. Navigate to the hosted version of the Polkadot/Substrate Portal front-end by connecting to the local node endpoint using this link: https://polkadot.js.org/apps/#/explorer?rpc=ws://localhost:9944.
+
+2. Go to Extrinsics.
+
+![Extrinsics](assets/page1.jpg)
+
+3. Choose `templateModule` and `createRole`.
+
+![Create-extrinsic](assets/page2.jpg)
+
+4. Choose `Alice` as the caller (she is an admin from genesis) and write down the `palletName` and `callName`.
+
+![Form-RoleCreated-transaction](assets/page3.jpg)
+
+5. Authorize the transaction to finilize it using `Sign and Submit` button.
+
+![Finilize-RoleCreated](assets/page4.jpg)
+
+6. Go to `Network/Explorer` to check that the transaction was successful. Also you can see that the `RoleCreated` event was fired.
+
+![RoleCreated-check](assets/page5.jpg)
+
+7. Let's return to `Extrinsics` to call `assignRole` using `Alice` account to assign `Bob` account `Execute` role for the call. You can see what data you should insert or choose for that. 
+
+![Form-RoleAssigned-transaction](assets/page6.jpg)
+
+8. Authorize the transaction to finilize it using `Sign and Submit` button.
+
+![Authorize-RoleAssigned](assets/page7.jpg)
+
+9. Go to `Network/Explorer` to check that the transaction was successful. Also you can see that the `RoleAssigned` event was fired for `Bob` account.
+
+![RoleAssigned-check](assets/page8.jpg)
 
 ## License
 

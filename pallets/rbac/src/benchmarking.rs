@@ -14,8 +14,9 @@ mod benchmarks {
 	#[benchmark]
 	fn create_role() {
 		let caller: T::AccountId = whitelisted_caller();
+		let permission = crate::Permission::Execute { call_name: [1; 36] };
 		#[extrinsic_call]
-		create_role(RawOrigin::Signed(caller), [0; 36], crate::Permission::Execute);
+		create_role(RawOrigin::Signed(caller), [0; 36], permission);
 	}
 
 	#[benchmark]
