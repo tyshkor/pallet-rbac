@@ -36,6 +36,9 @@ pub mod weights;
 const PALLET_NAME_LENGTH: usize = 36;
 type PalletName = [u8; PALLET_NAME_LENGTH];
 
+const CALL_NAME_LENGTH: usize = 36;
+type CallName = [u8; CALL_NAME_LENGTH];
+
 #[frame_support::pallet]
 pub mod pallet {
 	use super::*;
@@ -223,13 +226,13 @@ pub mod pallet {
 
 #[derive(PartialEq, Eq, Clone, RuntimeDebug, Encode, Decode, TypeInfo, MaxEncodedLen)]
 pub enum Permission {
-	Execute = 1,
-	Manage = 2,
+	Execute { call_name: CallName },
+	Manage,
 }
 
 impl Default for Permission {
 	fn default() -> Self {
-		Permission::Execute
+		Permission::Execute { call_name: [0; CALL_NAME_LENGTH] }
 	}
 }
 
@@ -240,8 +243,12 @@ pub struct Role {
 }
 
 impl<T: Config> Pallet<T> {
-	pub fn verify_execute_access(account_id: T::AccountId, pallet: PalletName) -> bool {
-		let role = Role { pallet, permission: Permission::Execute };
+	pub fn verify_execute_access(
+		account_id: T::AccountId,
+		pallet: PalletName,
+		call_name: CallName,
+	) -> bool {
+		let role = Role { pallet, permission: Permission::Execute { call_name } };
 		<RoleSet<T>>::contains_key(&role) && <PermissionSet<T>>::contains_key((account_id, role))
 	}
 
@@ -315,22 +322,32 @@ where
 
 		let md = call.get_call_metadata();
 
-		let pallet_name_bytes = md.pallet_name.as_bytes();
+		let call_name: CallName = validate_name::<CALL_NAME_LENGTH>(md.function_name)?;
 
-		if pallet_name_bytes.len() > 36 {
-			return Err(InvalidTransaction::Call.into())
-		}
+		let pallet_name: PalletName = validate_name::<PALLET_NAME_LENGTH>(md.pallet_name)?;
 
-		let mut pallet_name: PalletName = [0; PALLET_NAME_LENGTH];
-
-		for (i, &byte) in pallet_name_bytes.iter().enumerate() {
-			pallet_name[i] = byte;
-		}
-
-		if <Pallet<T>>::verify_execute_access(who.clone(), pallet_name) {
+		if <Pallet<T>>::verify_execute_access(who.clone(), pallet_name, call_name) {
 			Ok(Default::default())
 		} else {
 			Err(InvalidTransaction::Call.into())
 		}
 	}
+}
+
+fn validate_name<const NAME_LENGTH: usize>(
+	name: &str,
+) -> Result<[u8; NAME_LENGTH], TransactionValidityError> {
+	let name_bytes = name.as_bytes();
+
+	if name_bytes.len() > NAME_LENGTH {
+		return Err(InvalidTransaction::Call.into())
+	}
+
+	let mut name = [0; NAME_LENGTH];
+
+	for (i, &byte) in name_bytes.iter().enumerate() {
+		name[i] = byte;
+	}
+
+	Ok(name)
 }

@@ -5,18 +5,16 @@ use frame_support::{assert_noop, assert_ok};
 fn create_role() {
 	new_test_ext().execute_with(|| {
 		System::set_block_number(1);
+		let permission = crate::Permission::Execute { call_name: [1; 36] };
 		// Assert creating the role succeeds
 		assert_ok!(TemplateModule::create_role(
 			RuntimeOrigin::signed(1),
 			[0; 36],
-			crate::Permission::Execute
+			permission.clone(),
 		));
 		// Assert that the correct event was deposited
 		System::assert_last_event(
-			Event::RoleCreated {
-				role: Role { pallet: [0; 36], permission: crate::Permission::Execute },
-			}
-			.into(),
+			Event::RoleCreated { role: Role { pallet: [0; 36], permission } }.into(),
 		);
 	});
 }
@@ -26,22 +24,19 @@ fn create_the_same_role_twice_should_fail() {
 	new_test_ext().execute_with(|| {
 		System::set_block_number(1);
 		let pallet_name = [0; 36];
-		let role = Role { pallet: pallet_name, permission: crate::Permission::Execute };
+		let permission = crate::Permission::Execute { call_name: [1; 36] };
+		let role = Role { pallet: pallet_name, permission: permission.clone() };
 		// Assert creating the role first time succeeds
 		assert_ok!(TemplateModule::create_role(
 			RuntimeOrigin::signed(1),
 			pallet_name,
-			crate::Permission::Execute
+			permission.clone(),
 		));
 		// Assert that the correct event was deposited
 		System::assert_last_event(Event::RoleCreated { role }.into());
 		// Assert creating the same role second time fails
 		assert_noop!(
-			TemplateModule::create_role(
-				RuntimeOrigin::signed(1),
-				pallet_name,
-				crate::Permission::Execute
-			),
+			TemplateModule::create_role(RuntimeOrigin::signed(1), pallet_name, permission,),
 			crate::pallet::Error::RoleAlreadyExists::<Test>,
 		);
 	});
@@ -51,18 +46,19 @@ fn create_the_same_role_twice_should_fail() {
 fn assign_role() {
 	new_test_ext_with_general_admin().execute_with(|| {
 		System::set_block_number(1);
+		let permission = crate::Permission::Execute { call_name: [1; 36] };
 		// Assert creating the role succeeds
 		assert_ok!(TemplateModule::create_role(
 			RuntimeOrigin::signed(1),
 			[0; 36],
-			crate::Permission::Execute
+			permission.clone()
 		));
 		let pallet_name = [0; 36];
 		// Assert assigning the role succeeds
 		assert_ok!(TemplateModule::assign_role(
 			RuntimeOrigin::signed(1),
 			42,
-			crate::Role { pallet: pallet_name, permission: crate::Permission::Execute }
+			crate::Role { pallet: pallet_name, permission }
 		));
 		System::assert_last_event(Event::RoleAssigned { pallet_name, account_id: 42 }.into());
 	});
@@ -72,13 +68,14 @@ fn assign_role() {
 fn assign_non_existent_role_should_fail() {
 	new_test_ext_with_general_admin().execute_with(|| {
 		System::set_block_number(1);
-		let pallet_name = [0; 36];
+		let pallet = [0; 36];
+		let permission = crate::Permission::Execute { call_name: [1; 36] };
 		// Assert assigning the non-existent role fails
 		assert_noop!(
 			TemplateModule::assign_role(
 				RuntimeOrigin::signed(1),
 				42,
-				crate::Role { pallet: pallet_name, permission: crate::Permission::Execute }
+				crate::Role { pallet, permission }
 			),
 			crate::pallet::Error::RoleDoesNotExist::<Test>,
 		);

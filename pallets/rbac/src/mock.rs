@@ -1,6 +1,6 @@
 use crate as pallet_rbac;
 use frame_support::{
-	traits::{ConstU16, ConstU64, EnsureOrigin},
+	traits::{ConstU16, ConstU64},
 	weights::Weight,
 };
 use frame_system::EnsureRoot;
