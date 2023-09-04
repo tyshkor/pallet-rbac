@@ -5,6 +5,8 @@ use frame_support::{assert_noop, assert_ok};
 fn create_role() {
 	new_test_ext().execute_with(|| {
 		System::set_block_number(1);
+		// Assert adding a new Global Admin succeeds
+		assert_ok!(TemplateModule::add_global_admin(RuntimeOrigin::root(), 1));
 		let permission = crate::Permission::Execute { call_name: [1; 36] };
 		// Assert creating the role succeeds
 		assert_ok!(TemplateModule::create_role(
@@ -23,6 +25,8 @@ fn create_role() {
 fn create_the_same_role_twice_should_fail() {
 	new_test_ext().execute_with(|| {
 		System::set_block_number(1);
+		// Assert adding a new Global Admin succeeds
+		assert_ok!(TemplateModule::add_global_admin(RuntimeOrigin::root(), 1));
 		let pallet_name = [0; 36];
 		let permission = crate::Permission::Execute { call_name: [1; 36] };
 		let role = Role { pallet: pallet_name, permission: permission.clone() };
@@ -46,6 +50,8 @@ fn create_the_same_role_twice_should_fail() {
 fn assign_role() {
 	new_test_ext_with_general_admin().execute_with(|| {
 		System::set_block_number(1);
+		// Assert adding a new Global Admin succeeds
+		assert_ok!(TemplateModule::add_global_admin(RuntimeOrigin::root(), 1));
 		let permission = crate::Permission::Execute { call_name: [1; 36] };
 		// Assert creating the role succeeds
 		assert_ok!(TemplateModule::create_role(
@@ -68,6 +74,8 @@ fn assign_role() {
 fn assign_non_existent_role_should_fail() {
 	new_test_ext_with_general_admin().execute_with(|| {
 		System::set_block_number(1);
+		// Assert adding a new Global Admin succeeds
+		assert_ok!(TemplateModule::add_global_admin(RuntimeOrigin::root(), 1));
 		let pallet = [0; 36];
 		let permission = crate::Permission::Execute { call_name: [1; 36] };
 		// Assert assigning the non-existent role fails
@@ -86,6 +94,8 @@ fn assign_non_existent_role_should_fail() {
 fn unassign_role() {
 	new_test_ext_with_general_admin().execute_with(|| {
 		System::set_block_number(1);
+		// Assert adding a new Global Admin succeeds
+		assert_ok!(TemplateModule::add_global_admin(RuntimeOrigin::root(), 1));
 		let pallet_name = [0; 36];
 		let account_id = 42;
 		// Assert creating the role succeeds
@@ -115,6 +125,8 @@ fn unassign_role() {
 fn unassign_role_that_was_not_assigned_should_fail() {
 	new_test_ext_with_general_admin().execute_with(|| {
 		System::set_block_number(1);
+		// Assert adding a new Global Admin succeeds
+		assert_ok!(TemplateModule::add_global_admin(RuntimeOrigin::root(), 1));
 		let pallet_name = [0; 36];
 		// Assert creating the role succeeds
 		assert_ok!(TemplateModule::create_role(

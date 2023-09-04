@@ -134,16 +134,22 @@ pub mod pallet {
 			pallet_name: PalletName,
 			permission: Permission,
 		) -> DispatchResult {
-			ensure_signed(origin)?;
+			let who = ensure_signed(origin)?;
 
-			let role = Role { pallet: pallet_name, permission };
+			if Self::verify_manage_access(who.clone(), pallet_name.clone()) ||
+				<GlobalAdminSet<T>>::contains_key(&who)
+			{
+				let role = Role { pallet: pallet_name, permission };
 
-			if <RoleSet<T>>::contains_key(&role) {
-				return Err(Error::<T>::RoleAlreadyExists.into())
+				if <RoleSet<T>>::contains_key(&role) {
+					return Err(Error::<T>::RoleAlreadyExists.into())
+				}
+
+				RoleSet::<T>::insert(role.clone(), ());
+				Self::deposit_event(Event::RoleCreated { role });
+			} else {
+				return Err(Error::<T>::AccessDenied.into())
 			}
-
-			RoleSet::<T>::insert(role.clone(), ());
-			Self::deposit_event(Event::RoleCreated { role });
 
 			Ok(())
 		}
