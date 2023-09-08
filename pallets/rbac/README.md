@@ -92,7 +92,7 @@ pub type SignedExtra = (
 
 ```rust
 rbac: Some(RBACConfig {
-	super_admins: vec![get_account_id_from_seed::<sr25519::Public>("Alice")]
+	global_admins: vec![get_account_id_from_seed::<sr25519::Public>("Alice")]
 })
 ```
 
