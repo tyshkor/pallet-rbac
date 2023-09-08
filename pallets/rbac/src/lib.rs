@@ -236,7 +236,10 @@ pub mod pallet {
 		/// Only _root_ can remove a Global Admin.
 		#[pallet::call_index(4)]
 		#[pallet::weight(T::WeightInfo::add_global_admin())]
-		pub fn remove_global_admin(origin: OriginFor<T>, account_id: T::AccountId) -> DispatchResult {
+		pub fn remove_global_admin(
+			origin: OriginFor<T>,
+			account_id: T::AccountId,
+		) -> DispatchResult {
 			// Ensures that only root can call this ectrinsic
 			T::RbacAdminOrigin::ensure_origin(origin)?;
 			if !<GlobalAdminSet<T>>::contains_key(&account_id.clone()) {

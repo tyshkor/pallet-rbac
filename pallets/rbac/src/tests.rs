@@ -183,8 +183,10 @@ fn removing_non_global_admin_should_fail() {
 		System::set_block_number(1);
 		let account_id = 2;
 		// Assert removing a non-Global Admin fails
-		assert_noop!(TemplateModule::remove_global_admin(RuntimeOrigin::root(), account_id.clone()),
-		crate::pallet::Error::AccountWasNotGlobalAdmin::<Test>,);
+		assert_noop!(
+			TemplateModule::remove_global_admin(RuntimeOrigin::root(), account_id.clone()),
+			crate::pallet::Error::AccountWasNotGlobalAdmin::<Test>,
+		);
 	});
 }
 
