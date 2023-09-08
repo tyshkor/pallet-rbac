@@ -15,6 +15,7 @@ mod benchmarks {
 	fn create_role() {
 		let caller: T::AccountId = whitelisted_caller();
 		let permission = crate::Permission::Execute { call_name: [1; 36] };
+		GlobalAdminSet::<T>::insert(caller.clone(), ());
 		#[extrinsic_call]
 		create_role(RawOrigin::Signed(caller), [0; 36], permission);
 	}
@@ -56,6 +57,16 @@ mod benchmarks {
 	#[benchmark]
 	fn add_global_admin() {
 		let global_admin_candidate: T::AccountId = account("Bob", 3, 3);
+
+		#[extrinsic_call]
+		add_global_admin(RawOrigin::Root, global_admin_candidate);
+	}
+
+	#[benchmark]
+	fn remove_global_admin() {
+		let global_admin_candidate: T::AccountId = account("Bob", 3, 3);
+
+		GlobalAdminSet::<T>::insert(global_admin_candidate.clone(), ());
 
 		#[extrinsic_call]
 		add_global_admin(RawOrigin::Root, global_admin_candidate);

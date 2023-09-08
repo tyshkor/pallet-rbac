@@ -78,4 +78,15 @@ impl<T: frame_system::Config> crate::pallet::WeightInfo for WeightInfo<T> {
 			.saturating_add(Weight::from_parts(0, 0))
 			.saturating_add(T::DbWeight::get().writes(1))
 	}
+		/// Storage: `TemplateModule::GlobalAdminSet` (r:0 w:1)
+	/// Proof: `TemplateModule::GlobalAdminSet` (`max_values`: None, `max_size`: Some(48), added: 2523, mode: `MaxEncodedLen`)
+	fn remove_global_admin() -> Weight {
+		// Proof Size summary in bytes:
+		//  Measured:  `0`
+		//  Estimated: `0`
+		// Minimum execution time: 12_800_000 picoseconds.
+		Weight::from_parts(14_674_000, 0)
+			.saturating_add(Weight::from_parts(0, 0))
+			.saturating_add(T::DbWeight::get().writes(1))
+	}
 }

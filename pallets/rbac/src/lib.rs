@@ -61,6 +61,7 @@ pub mod pallet {
 		fn assign_role() -> Weight;
 		fn unassign_role() -> Weight;
 		fn add_global_admin() -> Weight;
+		fn remove_global_admin() -> Weight;
 	}
 
 	// Set for storing all Global Admins i.e. accounts that have access to all pallets' roles
@@ -235,7 +236,7 @@ pub mod pallet {
 		///
 		/// Only _root_ can remove a Global Admin.
 		#[pallet::call_index(4)]
-		#[pallet::weight(T::WeightInfo::add_global_admin())]
+		#[pallet::weight(T::WeightInfo::remove_global_admin())]
 		pub fn remove_global_admin(
 			origin: OriginFor<T>,
 			account_id: T::AccountId,
