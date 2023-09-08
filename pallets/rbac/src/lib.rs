@@ -108,6 +108,7 @@ pub mod pallet {
 		RoleUnassigned { pallet_name: PalletName, account_id: T::AccountId },
 		RoleAssigned { pallet_name: PalletName, account_id: T::AccountId },
 		GlobalAdminAdded { account_id: T::AccountId },
+		GlobalAdminRemoved { account_id: T::AccountId },
 	}
 
 	#[pallet::error]
@@ -116,6 +117,7 @@ pub mod pallet {
 		RoleAlreadyExists,
 		RoleDoesNotExist,
 		RoleWasNotAssigned,
+		AccountWasNotGlobalAdmin,
 	}
 
 	#[pallet::hooks]
@@ -225,6 +227,23 @@ pub mod pallet {
 			T::RbacAdminOrigin::ensure_origin(origin)?;
 			<GlobalAdminSet<T>>::insert(&account_id, ());
 			Self::deposit_event(Event::GlobalAdminAdded { account_id });
+			Ok(())
+		}
+
+		/// Remova a new Global Admin.
+		/// Global Admin has access to execute and manage all pallets.
+		///
+		/// Only _root_ can remove a Global Admin.
+		#[pallet::call_index(4)]
+		#[pallet::weight(T::WeightInfo::add_global_admin())]
+		pub fn remove_global_admin(origin: OriginFor<T>, account_id: T::AccountId) -> DispatchResult {
+			// Ensures that only root can call this ectrinsic
+			T::RbacAdminOrigin::ensure_origin(origin)?;
+			if !<GlobalAdminSet<T>>::contains_key(&account_id.clone()) {
+				return Err(Error::<T>::AccountWasNotGlobalAdmin.into())
+			}
+			<GlobalAdminSet<T>>::remove(&account_id);
+			Self::deposit_event(Event::GlobalAdminRemoved { account_id });
 			Ok(())
 		}
 	}

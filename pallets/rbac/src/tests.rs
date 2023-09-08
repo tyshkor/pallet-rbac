@@ -160,6 +160,35 @@ fn add_global_admin() {
 }
 
 #[test]
+fn remove_global_admin() {
+	new_test_ext_with_general_admin().execute_with(|| {
+		// Go past genesis block so events get deposited
+		System::set_block_number(1);
+		let account_id = 2;
+		// Assert adding a new Global Admin succeeds
+		assert_ok!(TemplateModule::add_global_admin(RuntimeOrigin::root(), account_id.clone()));
+		// Assert that the correct event was deposited
+		System::assert_last_event(Event::GlobalAdminAdded { account_id }.into());
+		// Assert removing a new Global Admin succeeds
+		assert_ok!(TemplateModule::remove_global_admin(RuntimeOrigin::root(), account_id.clone()));
+		// Assert that the correct event was deposited
+		System::assert_last_event(Event::GlobalAdminRemoved { account_id }.into());
+	});
+}
+
+#[test]
+fn removing_non_global_admin_should_fail() {
+	new_test_ext_with_general_admin().execute_with(|| {
+		// Go past genesis block so events get deposited
+		System::set_block_number(1);
+		let account_id = 2;
+		// Assert removing a non-Global Admin fails
+		assert_noop!(TemplateModule::remove_global_admin(RuntimeOrigin::root(), account_id.clone()),
+		crate::pallet::Error::AccountWasNotGlobalAdmin::<Test>,);
+	});
+}
+
+#[test]
 fn add_general_admin_by_nonroot_should_fail() {
 	new_test_ext().execute_with(|| {
 		// Assert adding a new Global Admin by root account succeeds
