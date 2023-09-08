@@ -155,7 +155,7 @@ fn testnet_genesis(
 		},
 		transaction_payment: Default::default(),
 		template_module: TemplateModuleConfig {
-			general_admins: vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
+			global_admins: vec![get_account_id_from_seed::<sr25519::Public>("Alice")],
 		},
 	}
 }

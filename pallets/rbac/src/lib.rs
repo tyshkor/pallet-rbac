@@ -66,7 +66,7 @@ pub mod pallet {
 	// Set for storing all Global Admins i.e. accounts that have access to all pallets' roles
 	// `StorageMap` is used as there are no native Set type
 	#[pallet::storage]
-	#[pallet::getter(fn general_admins)]
+	#[pallet::getter(fn global_admins)]
 	pub type GlobalAdminSet<T: Config> = StorageMap<_, Blake2_128Concat, T::AccountId, ()>;
 
 	// Set for storing all `Permission`s
@@ -83,19 +83,19 @@ pub mod pallet {
 
 	#[pallet::genesis_config]
 	pub struct GenesisConfig<T: Config> {
-		pub general_admins: Vec<T::AccountId>,
+		pub global_admins: Vec<T::AccountId>,
 	}
 
 	impl<T: Config> Default for GenesisConfig<T> {
 		fn default() -> Self {
-			Self { general_admins: Vec::new() }
+			Self { global_admins: Vec::new() }
 		}
 	}
 
 	#[pallet::genesis_build]
 	impl<T: Config> BuildGenesisConfig for GenesisConfig<T> {
 		fn build(&self) {
-			for admin in &self.general_admins {
+			for admin in &self.global_admins {
 				<GlobalAdminSet<T>>::insert(admin, ());
 			}
 		}

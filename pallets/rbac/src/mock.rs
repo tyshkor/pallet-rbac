@@ -79,7 +79,7 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 
 // Build genesis storage according to the mock runtime.
 pub fn new_test_ext_with_general_admin() -> sp_io::TestExternalities {
-	crate::pallet::GenesisConfig::<Test> { general_admins: vec![1] }
+	crate::pallet::GenesisConfig::<Test> { global_admins: vec![1] }
 		.build_storage()
 		.unwrap()
 		.into()
